@@ -31,6 +31,7 @@ const limiter = rateLimit({
   max: 100, // limit each IP to 100 requests per windowMs
   message: 'Too many requests from this IP, please try again after an hour',
 });
+app.set('trust proxy', true);
 app.use('/api/', limiter);
 
 // Enable CORS
