@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useParams, useNavigate } from 'react-router-dom';
+import { useLocation, useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle2, 
@@ -22,10 +22,15 @@ import {
   Database,
   Smartphone,
   Globe,
-  HelpCircle
+  HelpCircle,
+  BarChart2,
+  Plus,
+  Settings,
+  LogOut
 } from 'lucide-react';
 import api from '../api/api';
 import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import PDFReport from '../components/Audit/PDFReport';
 
@@ -33,6 +38,12 @@ const AuditResult = () => {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
   const [data, setData] = useState(location.state?.auditData || null);
   const [loading, setLoading] = useState(!data);
   const [activeSectionIdx, setActiveSectionIdx] = useState(0);
@@ -155,413 +166,489 @@ const AuditResult = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
-      {/* Navigation */}
-      <button 
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-colors group"
-      >
-        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Dashboard
-      </button>
-
-      {/* Hero Executive Summary Card */}
-      <div className={`glass p-8 md:p-10 rounded-3xl mb-12 border bg-gradient-to-br ${getScoreBg(data.seoScore)} relative overflow-hidden`}>
-        <div className="absolute right-0 top-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
-        
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-10 relative z-10">
-          {/* Circular Score Gauge & Grades */}
-          <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
-            <div className="relative flex items-center justify-center">
-              {/* SVG circular progress */}
-              <svg className="w-32 h-32 transform -rotate-90">
-                <circle 
-                  cx="64" cy="64" r="54" 
-                  className="stroke-slate-800" 
-                  strokeWidth="8" fill="transparent" 
-                />
-                <circle 
-                  cx="64" cy="64" r="54" 
-                  className={`transition-all duration-1000 ${
-                    data.seoScore >= 90 ? 'stroke-emerald-400' :
-                    data.seoScore >= 70 ? 'stroke-blue-400' :
-                    data.seoScore >= 50 ? 'stroke-amber-400' : 'stroke-rose-400'
-                  }`}
-                  strokeWidth="8" fill="transparent"
-                  strokeDasharray={2 * Math.PI * 54}
-                  strokeDashoffset={2 * Math.PI * 54 * (1 - data.seoScore / 100)}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <span className="absolute text-3xl font-black tracking-tight text-white">
-                {data.seoScore}
-              </span>
+    <div className="min-h-screen bg-[#f4f6f8] text-slate-800 flex overflow-hidden font-sans">
+      
+      {/* Left Sidebar Workspace Navigation */}
+      <aside className="w-64 bg-white border-r border-slate-200/60 p-6 flex flex-col justify-between shrink-0 h-screen sticky top-0">
+        <div className="space-y-8">
+          {/* Logo Branding */}
+          <Link to="/" className="flex items-center gap-3 px-2">
+            <div className="w-9 h-9 bg-slate-900 rounded-xl flex items-center justify-center shadow-sm">
+              <BarChart2 className="text-white w-5 h-5" />
             </div>
-            <div>
-              <div className="text-sm uppercase tracking-widest text-slate-400 mb-1">SEO Audit Grade</div>
-              <h2 className="text-3xl font-black text-white mb-2">{grade}</h2>
-              <p className="text-slate-300 text-sm max-w-md">URL: <a href={data.websiteURL} target="_blank" rel="noopener noreferrer" className="underline hover:text-white break-all">{data.websiteURL}</a></p>
-              <p className="text-xs text-slate-400 mt-2">Audited on {new Date(data.createdAt || Date.now()).toLocaleString()}</p>
+            <span className="text-lg font-black tracking-tight text-slate-950">
+              SEO Audit <span className="text-slate-500 font-medium">AI</span>
+            </span>
+          </Link>
+
+          {/* Nav Items */}
+          <nav className="space-y-1.5">
+            <Link 
+              to="/dashboard" 
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-600 hover:bg-slate-50 hover:text-slate-950 font-semibold transition-all duration-300"
+            >
+              <BarChart2 className="w-5 h-5 shrink-0" />
+              <span>Dashboard</span>
+            </Link>
+            <Link 
+              to="/" 
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-600 hover:bg-slate-50 hover:text-slate-950 font-semibold transition-all duration-300"
+            >
+              <Plus className="w-5 h-5 shrink-0" />
+              <span>New Audit</span>
+            </Link>
+            <Link 
+              to="/dashboard" 
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-600 hover:bg-slate-50 hover:text-slate-950 font-semibold transition-all duration-300"
+            >
+              <Globe className="w-5 h-5 shrink-0" />
+              <span>My Domains</span>
+            </Link>
+            <Link 
+              to="/dashboard" 
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-600 hover:bg-slate-50 hover:text-slate-950 font-semibold transition-all duration-300"
+            >
+              <Settings className="w-5 h-5 shrink-0" />
+              <span>Settings</span>
+            </Link>
+          </nav>
+        </div>
+
+        {/* Sidebar Footer User Profile */}
+        <div className="border-t border-slate-100 pt-6 space-y-4">
+          <div className="flex items-center gap-3 px-2">
+            <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 font-bold text-sm">
+              {user?.name ? user.name.split(' ').map(n => n[0]).join('') : 'U'}
+            </div>
+            <div className="min-w-0">
+              <h4 className="font-bold text-slate-950 text-sm truncate leading-tight">{user?.name || 'User Name'}</h4>
+              <p className="text-xs text-slate-400 truncate">SEO Specialist</p>
             </div>
           </div>
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-500 hover:bg-slate-50 hover:text-rose-600 font-semibold transition-all duration-300 text-sm cursor-pointer"
+          >
+            <LogOut className="w-4 h-4 shrink-0" />
+            <span>Log Out</span>
+          </button>
+        </div>
+      </aside>
 
-          {/* Impact Estimation & Buttons */}
-          <div className="flex flex-col gap-4 w-full sm:w-auto shrink-0">
-            <div className="bg-slate-950/40 border border-white/5 p-5 rounded-2xl max-w-sm">
-              <div className="flex items-center gap-2 text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">
-                <TrendingUp className="w-4 h-4" /> Est. Traffic Impact
-              </div>
-              <p className="text-slate-300 text-sm leading-relaxed">
-                {trafficImpact}
-              </p>
-            </div>
+      {/* Main Content Area */}
+      <main className="flex-grow p-8 overflow-y-auto h-screen">
+        
+        {/* Navigation back and header */}
+        <div className="flex justify-between items-center mb-8">
+          <button 
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors group font-bold text-sm"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Dashboard
+          </button>
 
-            <div className="flex flex-col sm:flex-row gap-3">
-              <PDFDownloadLink
-                document={<PDFReport data={{ ...data, grade, scoreCategory, trafficImpact, sections, roadmap, idealState }} />}
-                fileName={`SEO_Audit_Report_${data.websiteURL.replace(/[^a-z0-9]/gi, '_')}.pdf`}
-                className="btn-primary flex items-center justify-center gap-2 text-sm py-3 px-5"
-              >
-                {({ loading }) => (
-                  <>
-                    <Download className="w-4 h-4" />
-                    {loading ? 'Compiling PDF...' : 'Download Report'}
-                  </>
-                )}
-              </PDFDownloadLink>
-              <a 
-                href={data.websiteURL} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="btn-outline flex items-center justify-center gap-2 text-sm py-3 px-5"
-              >
-                <ExternalLink className="w-4 h-4" /> Visit Site
-              </a>
-            </div>
+          <div className="flex items-center gap-3">
+            <PDFDownloadLink
+              document={<PDFReport data={{ ...data, grade, scoreCategory, trafficImpact, sections, roadmap, idealState }} />}
+              fileName={`SEO_Audit_Report_${data.websiteURL.replace(/[^a-z0-9]/gi, '_')}.pdf`}
+              className="btn-primary flex items-center justify-center gap-2 text-xs py-2.5 px-4 cursor-pointer shadow-sm"
+            >
+              {({ loading }) => (
+                <>
+                  <Download className="w-4 h-4" />
+                  {loading ? 'Compiling PDF...' : 'Download PDF'}
+                </>
+              )}
+            </PDFDownloadLink>
+            <a 
+              href={data.websiteURL} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="btn-outline flex items-center justify-center gap-2 text-xs py-2.5 px-4 hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors"
+            >
+              <ExternalLink className="w-4 h-4" /> Visit Site
+            </a>
           </div>
         </div>
 
-        {/* Top 3 Critical Issues display */}
-        {topIssues && topIssues.length > 0 && (
-          <div className="mt-8 pt-8 border-t border-white/10">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-rose-400 mb-3 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4" /> Immediate Priorities to Fix:
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {topIssues.map((issue, idx) => (
-                <div key={idx} className="bg-red-950/20 border border-red-500/10 p-3 rounded-xl flex items-start gap-2 text-slate-300 text-xs">
-                  <span className="font-bold text-rose-400">{idx + 1}.</span>
-                  <span>{issue}</span>
+        {/* Hero Executive Summary Card */}
+        <div className="bg-white p-8 rounded-3xl mb-8 border border-slate-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.01)] relative overflow-hidden">
+          <div className="absolute right-0 top-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 relative z-10">
+            {/* Circular Score Gauge & Grades */}
+            <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+              <div className="relative flex items-center justify-center shrink-0">
+                {/* SVG circular progress */}
+                <svg className="w-28 h-28 transform -rotate-90">
+                  <circle 
+                    cx="56" cy="56" r="46" 
+                    className="stroke-slate-100" 
+                    strokeWidth="6" fill="transparent" 
+                  />
+                  <circle 
+                    cx="56" cy="56" r="46" 
+                    className={`transition-all duration-1000 ${
+                      data.seoScore >= 90 ? 'stroke-emerald-500' :
+                      data.seoScore >= 70 ? 'stroke-blue-500' :
+                      data.seoScore >= 50 ? 'stroke-amber-500' : 'stroke-rose-500'
+                    }`}
+                    strokeWidth="6" fill="transparent"
+                    strokeDasharray={2 * Math.PI * 46}
+                    strokeDashoffset={2 * Math.PI * 46 * (1 - data.seoScore / 100)}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <span className="absolute text-2xl font-black text-slate-900">
+                  {data.seoScore}
+                </span>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-0.5">SEO Audit Grade</div>
+                <h2 className="text-2xl font-black text-slate-900 mb-1">{grade}</h2>
+                <p className="text-slate-500 text-xs truncate max-w-sm font-semibold">URL: <a href={data.websiteURL} target="_blank" rel="noopener noreferrer" className="underline hover:text-slate-900 break-all">{data.websiteURL}</a></p>
+                <p className="text-[10px] text-slate-400 mt-1">Audited on {new Date(data.createdAt || Date.now()).toLocaleString()}</p>
+              </div>
+            </div>
+
+            {/* Impact Estimation */}
+            <div className="flex flex-col gap-4 w-full sm:w-auto shrink-0">
+              <div className="bg-slate-50 border border-slate-100 p-5 rounded-2xl max-w-sm shadow-sm">
+                <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+                  <TrendingUp className="w-4 h-4 text-slate-400" /> Est. Traffic Impact
                 </div>
-              ))}
+                <p className="text-slate-600 text-xs leading-relaxed font-semibold">
+                  {trafficImpact}
+                </p>
+              </div>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        
-        {/* Left 2 Columns: Score breakdown and Detailed checklist */}
-        <div className="lg:col-span-2 space-y-12">
+          {/* Top 3 Critical Issues display */}
+          {topIssues && topIssues.length > 0 && (
+            <div className="mt-8 pt-8 border-t border-slate-100">
+              <h4 className="text-[10px] font-bold uppercase tracking-wider text-rose-600 mb-3 flex items-center gap-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0" /> Immediate Priorities to Fix:
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {topIssues.map((issue, idx) => (
+                  <div key={idx} className="bg-rose-50 border border-rose-100/60 p-3 rounded-2xl flex items-start gap-2 text-rose-800 text-xs font-semibold">
+                    <span className="font-bold text-rose-600 shrink-0">{idx + 1}.</span>
+                    <span>{issue}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          {/* Score breakdown table */}
-          <section className="glass p-6 md:p-8 rounded-3xl">
-            <h3 className="text-xl font-bold mb-6 text-white flex items-center gap-2">
-              Score Breakdown
-            </h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-white/10 text-slate-400 text-xs uppercase tracking-wider">
-                    <th className="pb-3 font-semibold">Section</th>
-                    <th className="pb-3 font-semibold text-center">Score</th>
-                    <th className="pb-3 font-semibold text-center">Max Points</th>
-                    <th className="pb-3 font-semibold text-center">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sections.map((sec, idx) => (
-                    <tr 
-                      key={idx} 
-                      onClick={() => setActiveSectionIdx(idx)}
-                      className={`border-b border-white/5 last:border-b-0 cursor-pointer hover:bg-white/5 transition-colors ${
-                        activeSectionIdx === idx ? 'bg-white/[0.03]' : ''
-                      }`}
-                    >
-                      <td className="py-4 flex items-center gap-3 font-medium text-slate-200">
-                        <span className="text-slate-400">{getSectionIcon(sec.name)}</span>
-                        {sec.name}
-                      </td>
-                      <td className="py-4 text-center">
-                        <span className={`font-bold ${getScoreColor((sec.score / sec.maxPoints) * 100)}`}>
-                          {sec.score}
-                        </span>
-                      </td>
-                      <td className="py-4 text-center text-slate-400">
-                        {sec.maxPoints === 0 ? 'Bonus' : sec.maxPoints}
-                      </td>
-                      <td className="py-4 text-center text-lg">{sec.status}</td>
+          {/* Left Column: Detailed Findings & Checklist */}
+          <div className="lg:col-span-8 space-y-8">
+            
+            {/* Score breakdown table */}
+            <section className="bg-white p-6 rounded-3xl border border-slate-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.01)]">
+              <h3 className="text-base font-black mb-4 text-slate-950 tracking-tight flex items-center gap-2">
+                Score Breakdown
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-100 text-slate-400 text-xs font-bold tracking-wider">
+                      <th className="pb-3 font-semibold">Section</th>
+                      <th className="pb-3 font-semibold text-center">Score</th>
+                      <th className="pb-3 font-semibold text-center">Max Points</th>
+                      <th className="pb-3 font-semibold text-center">Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          {/* Interactive Checklists Section */}
-          <section className="glass p-6 md:p-8 rounded-3xl">
-            <h3 className="text-xl font-bold mb-4 text-white">
-              Detailed Findings & Fixes
-            </h3>
-            <p className="text-slate-400 text-sm mb-6">
-              Select an SEO category below to review current values, benchmark targets, and specific code implementations needed to achieve a perfect 100/100 score.
-            </p>
-
-            {/* Tab Bar scrollable */}
-            <div className="flex gap-2 border-b border-white/10 pb-3 overflow-x-auto no-scrollbar mb-6">
-              {sections.map((sec, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setActiveSectionIdx(idx);
-                    setExpandedChecks({});
-                  }}
-                  className={`flex items-center gap-2 whitespace-nowrap px-4 py-2 rounded-xl text-sm transition-all shrink-0 ${
-                    activeSectionIdx === idx 
-                      ? 'bg-blue-600 text-white font-bold shadow-lg shadow-blue-600/30' 
-                      : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  {getSectionIcon(sec.name)}
-                  <span>{sec.name.replace(/\s*\(Bonus\)/gi, '')}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Checklist lists */}
-            <div className="space-y-4">
-              {sections[activeSectionIdx]?.checks.map((chk, idx) => {
-                const isExpanded = !!expandedChecks[idx];
-                return (
-                  <div 
-                    key={idx} 
-                    className="border border-white/5 rounded-2xl bg-white/[0.01] hover:bg-white/[0.02] transition-colors overflow-hidden"
-                  >
-                    {/* Header trigger */}
-                    <div 
-                      onClick={() => toggleCheck(idx)}
-                      className="p-5 flex items-center justify-between gap-4 cursor-pointer select-none"
-                    >
-                      <div className="flex items-center gap-3">
-                        {getCheckStatusIcon(chk.status)}
-                        <div>
-                          <h4 className="font-bold text-slate-200 text-sm sm:text-base leading-snug">{chk.name}</h4>
-                          <span className={`text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded border inline-block mt-1 ${getCheckStatusColor(chk.status)}`}>
-                            {chk.status}
+                  </thead>
+                  <tbody className="divide-y divide-slate-50 text-sm">
+                    {sections.map((sec, idx) => (
+                      <tr 
+                        key={idx} 
+                        onClick={() => setActiveSectionIdx(idx)}
+                        className={`cursor-pointer hover:bg-slate-50/50 transition-colors ${
+                          activeSectionIdx === idx ? 'bg-slate-50/80' : ''
+                        }`}
+                      >
+                        <td className="py-3.5 flex items-center gap-3 font-bold text-slate-800">
+                          <span className="text-slate-400">{getSectionIcon(sec.name)}</span>
+                          {sec.name}
+                        </td>
+                        <td className="py-3.5 text-center">
+                          <span className={`font-bold ${getScoreColor((sec.score / sec.maxPoints) * 100)}`}>
+                            {sec.score}
                           </span>
+                        </td>
+                        <td className="py-3.5 text-center text-slate-500 font-semibold">
+                          {sec.maxPoints === 0 ? 'Bonus' : sec.maxPoints}
+                        </td>
+                        <td className="py-3.5 text-center text-lg">{sec.status}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            {/* Interactive Checklists Section */}
+            <section className="bg-white p-6 rounded-3xl border border-slate-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.01)]">
+              <h3 className="text-base font-black mb-1 text-slate-950 tracking-tight">
+                Detailed Findings & Fixes
+              </h3>
+              <p className="text-slate-400 text-xs mb-6 font-semibold">
+                Select an SEO category below to review current values, benchmark targets, and specific code implementations.
+              </p>
+
+              {/* Tab Bar scrollable */}
+              <div className="flex gap-2 border-b border-slate-100 pb-3 overflow-x-auto no-scrollbar mb-6">
+                {sections.map((sec, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      setActiveSectionIdx(idx);
+                      setExpandedChecks({});
+                    }}
+                    className={`flex items-center gap-2 whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                      activeSectionIdx === idx 
+                        ? 'bg-slate-900 text-white shadow-sm' 
+                        : 'bg-slate-50 text-slate-500 border border-slate-100 hover:bg-slate-100 hover:text-slate-900'
+                    }`}
+                  >
+                    {getSectionIcon(sec.name)}
+                    <span>{sec.name.replace(/\s*\(Bonus\)/gi, '')}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Checklist lists */}
+              <div className="space-y-3">
+                {sections[activeSectionIdx]?.checks.map((chk, idx) => {
+                  const isExpanded = !!expandedChecks[idx];
+                  return (
+                    <div 
+                      key={idx} 
+                      className="border border-slate-100 rounded-2xl bg-white hover:bg-slate-50/30 transition-colors overflow-hidden"
+                    >
+                      {/* Header trigger */}
+                      <div 
+                        onClick={() => toggleCheck(idx)}
+                        className="p-4 flex items-center justify-between gap-4 cursor-pointer select-none"
+                      >
+                        <div className="flex items-center gap-3">
+                          {getCheckStatusIcon(chk.status)}
+                          <div>
+                            <h4 className="font-bold text-slate-800 text-sm sm:text-base leading-snug">{chk.name}</h4>
+                            <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border inline-block mt-1 ${getCheckStatusColor(chk.status)}`}>
+                              {chk.status}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0">
+                          {chk.pointsLost > 0 && (
+                            <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-lg">
+                              -{chk.pointsLost} pts
+                            </span>
+                          )}
+                          {isExpanded ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        {chk.pointsLost > 0 && (
-                          <span className="text-xs font-bold text-rose-400 bg-rose-500/10 px-2 py-1 rounded-lg">
-                            -{chk.pointsLost} pts
-                          </span>
+
+                      {/* Expandable Body content */}
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="border-t border-slate-100"
+                          >
+                            <div className="p-5 bg-slate-50/50 space-y-4 text-sm">
+                              {/* Values Comparer */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Found Value</div>
+                                  <p className="font-semibold text-slate-800 break-words">{chk.currentValue || 'N/A'}</p>
+                                </div>
+                                <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                                  <div className="text-[10px] text-blue-500 font-bold uppercase tracking-wider mb-1">Target Ideal Value</div>
+                                  <p className="font-semibold text-slate-800 break-words">{chk.targetValue || 'N/A'}</p>
+                                </div>
+                              </div>
+
+                              {/* Fix action */}
+                              <div className="space-y-1">
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Fix Required:</div>
+                                <p className="text-slate-600 leading-relaxed text-sm font-semibold">{chk.fixRequired}</p>
+                              </div>
+
+                              {/* Example Code block */}
+                              {chk.fixRequired && chk.fixRequired !== 'None' && chk.targetValue && chk.status !== 'PASS' && (
+                                <div className="space-y-1">
+                                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Implementation Sample:</div>
+                                  <pre className="text-xs bg-slate-900 text-slate-100 p-4 rounded-xl overflow-x-auto border border-slate-800 font-mono leading-relaxed">
+                                    {chk.targetValue.includes('<') || chk.targetValue.includes('{') || chk.targetValue.includes('User-agent')
+                                      ? chk.targetValue
+                                      : `// Preferred Implementation:\n${chk.name}: ${chk.targetValue}`}
+                                  </pre>
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
                         )}
-                        {isExpanded ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
-                      </div>
+                      </AnimatePresence>
                     </div>
-
-                    {/* Expandable Body content */}
-                    <AnimatePresence>
-                      {isExpanded && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                          className="border-t border-white/5"
-                        >
-                          <div className="p-5 bg-black/10 space-y-4 text-sm">
-                            {/* Values Comparer */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                                <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">Found Value</div>
-                                <p className="font-medium text-slate-200 break-words">{chk.currentValue || 'N/A'}</p>
-                              </div>
-                              <div className="bg-blue-950/20 p-4 rounded-xl border border-blue-500/5">
-                                <div className="text-xs text-blue-400 uppercase tracking-wider mb-1">Target Ideal Value</div>
-                                <p className="font-medium text-slate-200 break-words">{chk.targetValue || 'N/A'}</p>
-                              </div>
-                            </div>
-
-                            {/* Fix action */}
-                            <div className="space-y-2">
-                              <div className="text-xs font-bold text-slate-300 uppercase tracking-wider">Fix Required:</div>
-                              <p className="text-slate-400 leading-relaxed text-sm">{chk.fixRequired}</p>
-                            </div>
-
-                            {/* Example Code block */}
-                            {chk.fixRequired && chk.fixRequired !== 'None' && chk.targetValue && chk.status !== 'PASS' && (
-                              <div className="space-y-2">
-                                <div className="text-xs font-bold text-slate-300 uppercase tracking-wider">Implementation Sample:</div>
-                                <pre className="text-xs bg-slate-950/80 p-4 rounded-xl overflow-x-auto border border-white/5 text-blue-300/90 font-mono leading-relaxed">
-                                  {chk.targetValue.includes('<') || chk.targetValue.includes('{') || chk.targetValue.includes('User-agent')
-                                    ? chk.targetValue
-                                    : `// Preferred Implementation:\n${chk.name}: ${chk.targetValue}`}
-                                </pre>
-                              </div>
-                            )}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        </div>
-
-        {/* Right Column: Roadmap & Ideal State guide */}
-        <div className="space-y-8">
-          
-          {/* Priority roadmap timeline */}
-          <section className="glass p-6 md:p-8 rounded-3xl">
-            <h3 className="text-xl font-bold mb-6 text-white flex items-center gap-2">
-              <Zap className="w-5 h-5 text-blue-400" /> Priority Fix Roadmap
-            </h3>
-
-            <div className="space-y-8 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-800">
-              
-              {/* Week 1 */}
-              <div className="relative pl-8">
-                <div className="absolute left-1.5 top-1.5 w-3.5 h-3.5 rounded-full bg-rose-500 ring-4 ring-rose-500/20" />
-                <h4 className="font-bold text-rose-400 text-sm uppercase tracking-wider mb-2">Week 1 — Critical Fixes</h4>
-                {roadmap.week1 && roadmap.week1.length > 0 ? (
-                  <ul className="space-y-2">
-                    {roadmap.week1.map((item, idx) => (
-                      <li key={idx} className="text-xs text-slate-300 flex items-start gap-1.5 leading-normal">
-                        <span className="text-rose-400 shrink-0 mt-0.5">•</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-xs text-slate-500 italic">No critical priority items.</p>
-                )}
+                  );
+                })}
               </div>
+            </section>
+          </div>
 
-              {/* Weeks 2-4 */}
-              <div className="relative pl-8">
-                <div className="absolute left-1.5 top-1.5 w-3.5 h-3.5 rounded-full bg-amber-500 ring-4 ring-amber-500/20" />
-                <h4 className="font-bold text-amber-400 text-sm uppercase tracking-wider mb-2">Week 2-4 — High Priority</h4>
-                {roadmap.week2to4 && roadmap.week2to4.length > 0 ? (
-                  <ul className="space-y-2">
-                    {roadmap.week2to4.map((item, idx) => (
-                      <li key={idx} className="text-xs text-slate-300 flex items-start gap-1.5 leading-normal">
-                        <span className="text-amber-400 shrink-0 mt-0.5">•</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-xs text-slate-500 italic">No high priority items.</p>
-                )}
-              </div>
+          {/* Right Column: Roadmap, Guides, Stats */}
+          <div className="lg:col-span-4 space-y-8">
+            
+            {/* Priority roadmap timeline */}
+            <section className="bg-white p-6 rounded-3xl border border-slate-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.01)]">
+              <h3 className="text-base font-black mb-6 text-slate-950 tracking-tight flex items-center gap-2">
+                <Zap className="w-5 h-5 text-blue-500" /> Priority Fix Roadmap
+              </h3>
 
-              {/* Month 2 */}
-              <div className="relative pl-8">
-                <div className="absolute left-1.5 top-1.5 w-3.5 h-3.5 rounded-full bg-blue-500 ring-4 ring-blue-500/20" />
-                <h4 className="font-bold text-blue-400 text-sm uppercase tracking-wider mb-2">Month 2 — Medium Priority</h4>
-                {roadmap.month2 && roadmap.month2.length > 0 ? (
-                  <ul className="space-y-2">
-                    {roadmap.month2.map((item, idx) => (
-                      <li key={idx} className="text-xs text-slate-300 flex items-start gap-1.5 leading-normal">
-                        <span className="text-blue-400 shrink-0 mt-0.5">•</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-xs text-slate-500 italic">No medium priority items.</p>
-                )}
-              </div>
-
-              {/* Ongoing */}
-              <div className="relative pl-8">
-                <div className="absolute left-1.5 top-1.5 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20" />
-                <h4 className="font-bold text-emerald-400 text-sm uppercase tracking-wider mb-2">Ongoing Maintenance</h4>
-                {roadmap.ongoing && roadmap.ongoing.length > 0 ? (
-                  <ul className="space-y-2">
-                    {roadmap.ongoing.map((item, idx) => (
-                      <li key={idx} className="text-xs text-slate-300 flex items-start gap-1.5 leading-normal">
-                        <span className="text-emerald-400 shrink-0 mt-0.5">•</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-xs text-slate-500 italic">No standard items.</p>
-                )}
-              </div>
-
-            </div>
-          </section>
-
-          {/* What a perfect 100/100 looks like guide */}
-          <section className="glass p-6 md:p-8 rounded-3xl">
-            <h3 className="text-lg font-bold mb-4 text-white flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-emerald-400" /> Perfect 100/100 Guide
-            </h3>
-            <p className="text-slate-400 text-xs mb-6">
-              Review what the ideal state of each SEO category looks like. Use these benchmarks to guide your developers.
-            </p>
-
-            <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
-              {idealState.map((state, idx) => (
-                <div key={idx} className="border-b border-white/5 pb-3 last:border-b-0 last:pb-0">
-                  <h4 className="text-xs font-bold text-slate-200 mb-1 flex items-center gap-1.5">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                    {state.section}
-                  </h4>
-                  <p className="text-[11px] text-slate-400 leading-relaxed">
-                    {state.description}
-                  </p>
+              <div className="space-y-6 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
+                
+                {/* Week 1 */}
+                <div className="relative pl-8">
+                  <div className="absolute left-1.5 top-1.5 w-3.5 h-3.5 rounded-full bg-rose-500 ring-4 ring-rose-100" />
+                  <h4 className="font-bold text-rose-600 text-xs uppercase tracking-wider mb-2">Week 1 — Critical Fixes</h4>
+                  {roadmap.week1 && roadmap.week1.length > 0 ? (
+                    <ul className="space-y-2">
+                      {roadmap.week1.map((item, idx) => (
+                        <li key={idx} className="text-xs text-slate-600 flex items-start gap-1.5 leading-normal font-semibold">
+                          <span className="text-rose-500 shrink-0 mt-0.5">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-xs text-slate-400 italic">No critical priority items.</p>
+                  )}
                 </div>
-              ))}
-            </div>
-          </section>
 
-          {/* Technical page speed statistics */}
-          <div className="glass p-6 md:p-8 rounded-3xl">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">Crawler Technical Stats</h3>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between border-b border-white/5 pb-2">
-                <span className="text-slate-400">Total Response Time</span>
-                <span className="text-slate-200 font-semibold">{data.metrics?.responseTime || 0} ms</span>
+                {/* Weeks 2-4 */}
+                <div className="relative pl-8">
+                  <div className="absolute left-1.5 top-1.5 w-3.5 h-3.5 rounded-full bg-amber-500 ring-4 ring-amber-100" />
+                  <h4 className="font-bold text-amber-600 text-xs uppercase tracking-wider mb-2">Week 2-4 — High Priority</h4>
+                  {roadmap.week2to4 && roadmap.week2to4.length > 0 ? (
+                    <ul className="space-y-2">
+                      {roadmap.week2to4.map((item, idx) => (
+                        <li key={idx} className="text-xs text-slate-600 flex items-start gap-1.5 leading-normal font-semibold">
+                          <span className="text-amber-500 shrink-0 mt-0.5">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-xs text-slate-400 italic">No high priority items.</p>
+                  )}
+                </div>
+
+                {/* Month 2 */}
+                <div className="relative pl-8">
+                  <div className="absolute left-1.5 top-1.5 w-3.5 h-3.5 rounded-full bg-blue-500 ring-4 ring-blue-100" />
+                  <h4 className="font-bold text-blue-600 text-xs uppercase tracking-wider mb-2">Month 2 — Medium Priority</h4>
+                  {roadmap.month2 && roadmap.month2.length > 0 ? (
+                    <ul className="space-y-2">
+                      {roadmap.month2.map((item, idx) => (
+                        <li key={idx} className="text-xs text-slate-600 flex items-start gap-1.5 leading-normal font-semibold">
+                          <span className="text-blue-500 shrink-0 mt-0.5">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-xs text-slate-400 italic">No medium priority items.</p>
+                  )}
+                </div>
+
+                {/* Ongoing */}
+                <div className="relative pl-8">
+                  <div className="absolute left-1.5 top-1.5 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100" />
+                  <h4 className="font-bold text-emerald-600 text-xs uppercase tracking-wider mb-2">Ongoing Maintenance</h4>
+                  {roadmap.ongoing && roadmap.ongoing.length > 0 ? (
+                    <ul className="space-y-2">
+                      {roadmap.ongoing.map((item, idx) => (
+                        <li key={idx} className="text-xs text-slate-600 flex items-start gap-1.5 leading-normal font-semibold">
+                          <span className="text-emerald-500 shrink-0 mt-0.5">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-xs text-slate-400 italic">No standard items.</p>
+                  )}
+                </div>
+
               </div>
-              <div className="flex justify-between border-b border-white/5 pb-2">
-                <span className="text-slate-400">Time to First Byte (TTFB)</span>
-                <span className="text-slate-200 font-semibold">{Math.round((data.metrics?.responseTime || 0) * 0.35)} ms</span>
+            </section>
+
+            {/* Perfect 100/100 guide */}
+            <section className="bg-white p-6 rounded-3xl border border-slate-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.01)]">
+              <h3 className="text-sm font-bold mb-3 text-slate-900 flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-emerald-500" /> Perfect 100/100 Guide
+              </h3>
+              <p className="text-slate-400 text-[11px] mb-5 font-semibold leading-relaxed">
+                Review what the ideal state of each SEO category looks like. Use these benchmarks to guide improvements.
+              </p>
+
+              <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                {idealState.map((state, idx) => (
+                  <div key={idx} className="border-b border-slate-100 pb-3 last:border-b-0 last:pb-0">
+                    <h4 className="text-xs font-bold text-slate-800 mb-1 flex items-center gap-1.5">
+                      <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                      {state.section}
+                    </h4>
+                    <p className="text-[11px] text-slate-500 leading-relaxed font-semibold">
+                      {state.description}
+                    </p>
+                  </div>
+                ))}
               </div>
-              <div className="flex justify-between border-b border-white/5 pb-2">
-                <span className="text-slate-400">Total Crawled Page Size</span>
-                <span className="text-slate-200 font-semibold">{(data.metrics?.pageSize || '28.4 KB')}</span>
-              </div>
-              <div className="flex justify-between border-b border-white/5 pb-2">
-                <span className="text-slate-400">Internal Link Count</span>
-                <span className="text-slate-200 font-semibold">{data.metrics?.internalLinks || 0}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">External Link Count</span>
-                <span className="text-slate-200 font-semibold">{data.metrics?.externalLinks || 0}</span>
+            </section>
+
+            {/* Technical statistics */}
+            <div className="bg-white p-6 rounded-3xl border border-slate-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.01)]">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">Crawler Technical Stats</h3>
+              <div className="space-y-3 text-sm font-semibold">
+                <div className="flex justify-between border-b border-slate-100 pb-2">
+                  <span className="text-slate-400">Total Response Time</span>
+                  <span className="text-slate-800">{data.metrics?.responseTime || 0} ms</span>
+                </div>
+                <div className="flex justify-between border-b border-slate-100 pb-2">
+                  <span className="text-slate-400">Time to First Byte (TTFB)</span>
+                  <span className="text-slate-800">{Math.round((data.metrics?.responseTime || 0) * 0.35)} ms</span>
+                </div>
+                <div className="flex justify-between border-b border-slate-100 pb-2">
+                  <span className="text-slate-400">Total Crawled Page Size</span>
+                  <span className="text-slate-800">{(data.metrics?.pageSize || '28.4 KB')}</span>
+                </div>
+                <div className="flex justify-between border-b border-slate-100 pb-2">
+                  <span className="text-slate-400">Internal Link Count</span>
+                  <span className="text-slate-800">{data.metrics?.internalLinks || 0}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">External Link Count</span>
+                  <span className="text-slate-800">{data.metrics?.externalLinks || 0}</span>
+                </div>
               </div>
             </div>
+
           </div>
 
         </div>
 
-      </div>
+      </main>
+
     </div>
   );
 };

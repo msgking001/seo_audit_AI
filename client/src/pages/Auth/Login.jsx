@@ -31,12 +31,12 @@ const Login = () => {
         animate={{ opacity: 1, scale: 1 }}
         className="glass w-full max-w-md p-10 rounded-3xl"
       >
-        <h2 className="text-3xl font-bold mb-2">Welcome Back</h2>
-        <p className="text-slate-400 mb-8">Sign in to your SEO workspace</p>
+        <h2 className="text-3xl font-bold mb-2 text-slate-900 tracking-tight">Welcome Back</h2>
+        <p className="text-slate-500 mb-8">Sign in to your SEO workspace</p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-2 text-slate-300">Email Address</label>
+            <label className="block text-sm font-semibold mb-2 text-slate-600">Email Address</label>
             <input
               type="email"
               className="input-field"
@@ -47,7 +47,7 @@ const Login = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2 text-slate-300">Password</label>
+            <label className="block text-sm font-semibold mb-2 text-slate-600">Password</label>
             <input
               type="password"
               className="input-field"
@@ -60,14 +60,14 @@ const Login = () => {
           <button 
             type="submit" 
             disabled={loading}
-            className="btn-primary w-full py-4 mt-4"
+            className="btn-primary w-full py-4 mt-4 cursor-pointer"
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
-        <p className="mt-8 text-center text-slate-400">
-          Don't have an account? <Link to="/register" className="text-blue-500 hover:underline font-medium">Create one</Link>
+        <p className="mt-8 text-center text-slate-500">
+          Don't have an account? <Link to="/register" className="text-slate-900 hover:underline font-semibold">Create one</Link>
         </p>
       </motion.div>
     </div>
