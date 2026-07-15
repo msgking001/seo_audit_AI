@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://seoauditai.up.railway.app/api',
+  baseURL: 'https://seoauditai-production.up.railway.app/api',
 });
 //kk
 // Add a request interceptor to include auth token
