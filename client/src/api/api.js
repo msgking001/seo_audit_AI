@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: `https://seo-audit-ai.onrender.com/`
+  baseURL: `https://seo-audit-ai.onrender.com/api`
 });
 //kk
 // Add a request interceptor to include auth token
